@@ -1,0 +1,21 @@
+{
+  "name": "img-media-uploader1",
+  "version": "1.0.0",
+  "description": "This is post app which allow user to post image with caption, in this project used cloud storage service to upload media on ImageKit and the plateform will provide url which will be saved in mongodb as mongodb is not made to store media file.",
+  "license": "ISC",
+  "author": "Nikhil Verma",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "imagekit": "^6.0.0",
+    "mongoose": "^9.3.0",
+    "multer": "^2.1.1",
+    "nodemon": "^3.1.14"
+  }
+}
