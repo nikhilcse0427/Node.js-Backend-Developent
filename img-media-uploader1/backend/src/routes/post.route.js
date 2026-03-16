@@ -36,4 +36,22 @@ router.post('/create-post', upload.single("image"), async (req, res) => {
 })
 
 
+router.get('/get-feed', async (req, res)=>{
+  try{
+    const feed = await postModel.find({});
+
+    return res.status(200).json({
+      message: "feed fetched successfully",
+      feed,
+    });
+  }catch(error){
+    console.log("fetching feed unsuccessfull ", error.message)
+    return res.status(500).json({
+      message: "failed to fetch feed",
+      error: error.message,
+    });
+  }
+})
+
+
 export { router }

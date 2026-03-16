@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import ImageKit from "imagekit";
-// Install: npm install @imagekit/nodejs
+import ImageKit from "@imagekit/nodejs";
 
 
 
@@ -14,7 +13,7 @@ const client = new ImageKit({
 
 const uploadFile = async (buffer)=>{
   try{  
-    const response = await client.upload({
+    const response = await client.files.upload({
       file: buffer.toString("base64"),
       fileName: "image.jpg",
     });

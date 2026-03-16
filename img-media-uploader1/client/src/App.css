@@ -1,0 +1,128 @@
+/* Simple, clean app styling */
+:root {
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #111827;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: #ffffff;
+}
+
+.app {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px; /* login-page-like width */
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 22px;
+  width: 100%;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.postForm,
+.form {
+  display: grid;
+  gap: 12px;
+}
+
+/* Simple fixed-size form box */
+.formBox {
+  width: 100%;
+  max-width: 420px;
+}
+
+input[type="file"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+.input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  outline: none;
+}
+
+input:focus,
+.input:focus {
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.12);
+}
+
+button,
+.button {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #ffffff;
+  color: var(--text);
+  transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+}
+
+button:hover,
+.button:hover {
+  background: #f9fafb;
+}
+
+button:active,
+.button:active {
+  transform: translateY(1px);
+}
+
+.buttonPrimary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.pageTitle {
+  text-align: center;
+  font-size: 42px;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
