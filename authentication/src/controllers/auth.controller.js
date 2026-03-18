@@ -30,18 +30,32 @@ const userRegisteration = async (req, res)=>{
       password
     })
 
-    const token = await jwt.sign(
+    const accessToken = jwt.sign(
       {user:user._id},
       process.env.JWT_SECRET_KEY,
-      {expiresIn: '1d'}
+      {expiresIn: '1h'}
     );
+
+    const refreshToken = jwt.sign(
+      {user:user._id},
+      process.env.JWT_SECRET_KEY,
+      {expiresIn: '7d'}
+    );
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: true,
+      maxAge: 7*24*60*60*1000 //days
+    })
 
     res.status(201).json({
       message: "user successfully created",
       success: true,
-      token: token,
+      token: accessToken,
       user: user
     })
+    
     
 
 
@@ -54,53 +68,12 @@ const userRegisteration = async (req, res)=>{
   }
 }
 
-// const userLogin = async (req, res)=>{
-//   try{
-//     const {userName, email, password} = req.body;
-//     if((!userName && !email) || !password){
-//       res.status(400).json({
-//         message: "all fields are required",
-//         success:false
-//       })
-//       return;
-//     }
-//     const user = await userModel.findOne({$or:[{userName}, {email}]}).select('+password');
-//     if(!user){
-//       res.status(401).json({
-//         message: "Invalid credential for login",
-//         success: false
-//       })
-//        return;
-//     }
-//     const isPasswordMatch = await user.comparePassword(password);
-
-//     if(!isPasswordMatch){
-//         res.status(401).json({
-//           message: "password does not match enter correct password",
-//           success: false
-//         })
-//         return;
-//     }
-//     // user.password=undefined;
-//     res.status(200).json({
-//       message: "user successfully loggedin",
-//       success: false,
-//       user: user
-//     })
-//   }catch(error){
-//     console.log("Login failed ", error.message)
-//     res.status(401).json({
-//       message: "Invalid credential please enter correct credentials",
-//       success: false
-//     })
-//   }
-// }
 
 const userLogin = async (req, res) => {
   try {
+    const token = req.header.authorization.split(' ')[1];
     const { userName, email, password } = req.body;
 
-    // 1. Validation
     if ((!userName && !email) || !password) {
       return res.status(400).json({
         message: "Username/email and password are required",
@@ -146,6 +119,109 @@ const userLogin = async (req, res) => {
   }
 };
 
+// const getMe = async (req, res)=>{
+//   try{
+//     const token = req.headers.authorization.split(' ')[2];
+//     if(!token){
+//       return res(409).json({
+//         message: "token not found",
+//         sucess: false,
+//       })
+//     }
+//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+//     const user = await userModel.findById(decodedToken.id).select('-password');
+//     if(!user){
+//       return res.json({
+//         message: "user does not exist",
+//         success: false
+//       })
+//     }
+//     res.status(200).json({
+//       message: "user found",
+//       success: false,
+//       user: user
+//     })
+//   }catch(error){
+//     console.log("get me unsuccessfull", error.message);
+//     res.status(401).json({
+//       message: "get me unsuccessfull",
+//       success: false
+//     })
+//   }
+// }
+
+// const getMe = async (req, res)=>{
+//   try{
+//     const token = req.headers.authorization.split(' ')[1];
+//     if(!token){
+//       return res(409).json({
+//         message: "token not found",
+//         sucess: false,
+//       })
+//     }
+//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+//     const user = await userModel.findById(decodedToken.id).select('-password');
+//     if(!user){
+//       return res.json({
+//         message: "user does not exist",
+//         success: false
+//       })
+//     }
+//     res.status(200).json({
+//       message: "user found",
+//       success: false,
+//       user: user
+//     })
+//   }catch(error){
+//     console.log("get me unsuccessfull", error.message);
+//     res.status(401).json({
+//       message: "get me unsuccessfull",
+//       success: false
+//     })
+//   }
+// }
+
+const getMe = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Token not found",
+        success: false,
+      });
+    }
 
 
-export {userRegisteration, userLogin};
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    const user = await userModel
+      .findById(decodedToken.user) // ✅ FIXED
+      .select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User does not exist",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "User found",
+      success: true,
+      user,
+    });
+
+  } catch (error) {
+    console.log("get me unsuccessful", error.message);
+
+    return res.status(401).json({
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
+
+
+export {userRegisteration, userLogin, getMe};
