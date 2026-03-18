@@ -215,27 +215,75 @@ const refreshToken = async (req, res)=>{
   }
 }
 
+// logout from current device
 const logout = async (req, res)=>{
   try{
     const refreshToken = req.cookies.refreshToken;
     if(!refreshToken){
-      return res.json(400).json({
+      return res.status(400).json({
         message: "refresh token not found",
         success: false
       })
     }
-    const decodedRefreshToken = (refreshToken, process.env.JWT_SECRET_KEY);
+    const decodedRefreshToken = argon2.verify(refreshToken);
 
+    const session = await sessionModel.findOne({
+      decodedRefreshToken,
+      isRevoked: false
+    })
 
+    if(!session){
+      res.status(400).json({
+        message: "session not found",
+        success: false
+      })
+    }
+
+    session.isRevoked = true;
+    await session.save();
+
+    res.clearCookies("refreshToken");
+
+    res.status(201).json({
+      message: "logout successfully",
+      success: true
+    })
   }catch(error){
-    console.log("logout failed ", error.message);
-    res.status(409).json({
-      message: "Logout failed",
+    console.log("Logout failed ", error.message);
+    return res.json({
+      message: "logout failed",
       success: false
     })
   }
 }
 
+const logoutAll = async (req, res)=> {
+
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+        return res.status(400).json({
+            message: "Refresh token not found"
+        })
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY)
+
+    await sessionModel.updateMany({
+        user: decoded.id,
+        revoked: false
+    }, {
+        revoked: true
+    })
+
+    res.clearCookie("refreshToken")
+
+    res.status(200).json({
+        message: "Logged out from all devices successfully"
+    })
+
+}
 
 
-export {userRegisteration, userLogin, getMe, refreshToken, logout};
+
+export {userRegisteration, userLogin, getMe, refreshToken, logout, logoutAll};
