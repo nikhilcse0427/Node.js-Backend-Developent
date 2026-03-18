@@ -1,9 +1,10 @@
 import userModel from "../models/user.model.js";
 import jwt from 'jsonwebtoken'
+import argon2 from "argon2";
 
 const userRegisteration = async (req, res)=>{
   try{
-    const {userName, email, password} = req.body;
+    let {userName, email, password} = req.body;
     if(!userName || !email || !password){
       res.status(400).json({ // status code 400 -user sent invalid or incomplete data
         message: "All fields are required for user registeration",
@@ -24,11 +25,15 @@ const userRegisteration = async (req, res)=>{
       return;
     }
 
+    const hashedPassword = await argon2.hash(password);
+
     const user = await userModel.create({
       userName,
       email,
-      password
+      password:hashedPassword
     })
+
+    user.password = undefined;
 
     const accessToken = jwt.sign(
       {user:user._id},
@@ -55,9 +60,6 @@ const userRegisteration = async (req, res)=>{
       token: accessToken,
       user: user
     })
-    
-    
-
 
   }catch(error){
     console.log("user registeration failed ", error.message);
@@ -118,68 +120,6 @@ const userLogin = async (req, res) => {
     });
   }
 };
-
-// const getMe = async (req, res)=>{
-//   try{
-//     const token = req.headers.authorization.split(' ')[2];
-//     if(!token){
-//       return res(409).json({
-//         message: "token not found",
-//         sucess: false,
-//       })
-//     }
-//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-//     const user = await userModel.findById(decodedToken.id).select('-password');
-//     if(!user){
-//       return res.json({
-//         message: "user does not exist",
-//         success: false
-//       })
-//     }
-//     res.status(200).json({
-//       message: "user found",
-//       success: false,
-//       user: user
-//     })
-//   }catch(error){
-//     console.log("get me unsuccessfull", error.message);
-//     res.status(401).json({
-//       message: "get me unsuccessfull",
-//       success: false
-//     })
-//   }
-// }
-
-// const getMe = async (req, res)=>{
-//   try{
-//     const token = req.headers.authorization.split(' ')[1];
-//     if(!token){
-//       return res(409).json({
-//         message: "token not found",
-//         sucess: false,
-//       })
-//     }
-//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-//     const user = await userModel.findById(decodedToken.id).select('-password');
-//     if(!user){
-//       return res.json({
-//         message: "user does not exist",
-//         success: false
-//       })
-//     }
-//     res.status(200).json({
-//       message: "user found",
-//       success: false,
-//       user: user
-//     })
-//   }catch(error){
-//     console.log("get me unsuccessfull", error.message);
-//     res.status(401).json({
-//       message: "get me unsuccessfull",
-//       success: false
-//     })
-//   }
-// }
 
 const getMe = async (req, res) => {
   try {
@@ -256,6 +196,27 @@ const refreshToken = async (req, res)=>{
   }
 }
 
+const logout = async (req, res)=>{
+  try{
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken){
+      return res.json(400).json({
+        message: "refresh token not found",
+        success: false
+      })
+    }
+    const decodedRefreshToken = (refreshToken, process.env.JWT_SECRET_KEY);
 
 
-export {userRegisteration, userLogin, getMe, refreshToken};
+  }catch(error){
+    console.log("logout failed ", error.message);
+    res.status(409).json({
+      message: "Logout failed",
+      success: false
+    })
+  }
+}
+
+
+
+export {userRegisteration, userLogin, getMe, refreshToken, logout};
