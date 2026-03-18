@@ -222,6 +222,40 @@ const getMe = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res)=>{
+  try{
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken){
+      return res.status(400).json({
+        message: "refresh token not found",
+        success: false
+      })
+    }
+    const decodedRefreshToken = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY);
+
+    const accessToken = jwt.sign({id: decodedRefreshToken.id}, process.env.JWT_SECRET_KEY, {expiresIn: '1h'});
+    const generateNewRefreshToken = jwt.sign({id: decodedRefreshToken.id}, process.env.JWT_SECRET_KEY, {expiresIn: '15d'})
+
+    res.cookie("refreshToken", generateNewRefreshToken, {
+      httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    return res.status(200).json({
+      message: "access token and refresh token successfully created",
+      success: true,
+      accessToken: accessToken
+    })
+  }catch(error){
+    console.log("access token not created ", error.message);
+    res.status(401).json({
+      message: "access token not created",
+      success: false
+    })
+  }
+}
 
 
-export {userRegisteration, userLogin, getMe};
+
+export {userRegisteration, userLogin, getMe, refreshToken};
