@@ -3,7 +3,7 @@ import {userRegisteration, userLogin, getMe, refreshToken} from '../controllers/
 const authRouter = express.Router();
 
 authRouter.post('/user-register', userRegisteration);
-authRouter.get('/user-login', userLogin);
+authRouter.post('/user-login', userLogin);
 authRouter.get('/get-me', getMe);
 authRouter.get('/generate-accessToken', refreshToken);
 

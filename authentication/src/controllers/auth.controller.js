@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import jwt from 'jsonwebtoken'
 import argon2 from "argon2";
+import sessionModel from "../models/session.model.js";
 
 const userRegisteration = async (req, res)=>{
   try{
@@ -25,12 +26,10 @@ const userRegisteration = async (req, res)=>{
       return;
     }
 
-    const hashedPassword = await argon2.hash(password);
-
     const user = await userModel.create({
       userName,
       email,
-      password:hashedPassword
+      password
     })
 
     user.password = undefined;
@@ -70,11 +69,9 @@ const userRegisteration = async (req, res)=>{
   }
 }
 
-
 const userLogin = async (req, res) => {
   try {
-    const token = req.header.authorization.split(' ')[1];
-    const { userName, email, password } = req.body;
+    let { userName, email, password } = req.body;
 
     if ((!userName && !email) || !password) {
       return res.status(400).json({
@@ -83,7 +80,7 @@ const userLogin = async (req, res) => {
       });
     }
 
-    const user = await userModel
+    let user = await userModel
       .findOne({ $or: [{ userName }, { email }] })
       .select("+password");
 
@@ -95,7 +92,8 @@ const userLogin = async (req, res) => {
     }
 
     const isPasswordMatch = await user.comparePassword(password);
-
+    console.log("Password match:", isPasswordMatch);
+    
     if (!isPasswordMatch) {
       return res.status(401).json({
         message: "Invalid credentials",
@@ -103,12 +101,33 @@ const userLogin = async (req, res) => {
       });
     }
 
+    const refreshToken = jwt.sign({id:user.id}, process.env.JWT_SECRET_KEY, {expiresIn: '1d'});
+
+    const hashedRefreshToken = await argon2.hash(refreshToken);
+
+    const session = await sessionModel.create({
+      user: user._id,
+      ip: req.ip,
+      refreshToken: hashedRefreshToken,
+      userAgent: req.headers[ "user-agent" ]
+    })
+
+    const accessToken = jwt.sign({id:user.id, sessionId: session._id}, process.env.JWT_SECRET_KEY, {expiresIn: '15m'});
+
+    res.cookie("refreshToken",refreshToken,{
+       httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     user.password = undefined;
 
     return res.status(200).json({
       message: "User successfully logged in",
       success: true,
-      user: user
+      user: user,
+      token: accessToken
     });
 
   } catch (error) {

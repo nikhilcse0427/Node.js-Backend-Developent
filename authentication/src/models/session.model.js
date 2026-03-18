@@ -14,12 +14,14 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     required: [ true, "User agent is required" ]
   },
-  hashedRefreshToken:{
+  refreshToken:{
     type: String,
     required: [true, "refresh token is required"]
   },
-  isRevoked: Boolean,
-  default: false
+  isRevoked:{
+    type: Boolean,
+    default: false
+  } 
 }, {timestamps: true})
 
 
