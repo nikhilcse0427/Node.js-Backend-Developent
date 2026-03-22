@@ -1,0 +1,23 @@
+{
+  "name": "spotify-project-3",
+  "version": "1.0.0",
+  "description": "This project provides a platform where user can listen song where as artist can upload songs at platform and it is based on user role.",
+  "license": "ISC",
+  "author": "Nikhil Verma",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.1",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.14"
+  }
+}
