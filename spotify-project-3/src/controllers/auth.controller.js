@@ -55,6 +55,58 @@ const userRegisteraion = async (req, res)=>{
   }
 }
 
+const userLogin = async (req, res)=>{
+  try{
+    let {userName, email, password} = req.body;
+    if(!email || !password || !userName){
+      return res.status(400).json({
+        message: "email, password and userName all fields are required",
+        success: false
+      })
+    }
+
+    const user = await userModel.findOne({userName, email}).select("+password")
+
+    if(!user){
+      return res.status(401).json({
+        message: "Invalid userName or email",
+        success: false
+      })
+    }
+
+    const isPasswordMatch = await user.comparePassword(password);
+    if(!isPasswordMatch){
+      return res.status(401).json({
+        message: "Invalid password entered",
+        success: false
+      })
+    }
+
+    const token = jwt.sign(
+      {id: user.id, role:user.role},
+      process.env.JWT_SECRET,
+      {expiresIn: '15h'}
+    )
+
+    res.cookie("user", token);
+
+    user.password = undefined
+
+    res.status(200).json({
+      message: "user login successfully",
+      success: true,
+      user: user,
+      token: token
+    })
+  }catch(error){
+    console.log("user login failed ", error.message);
+    res.status(500).json({
+      message: "user login failed",
+      success: false
+    })
+  }
+}
 
 
-export {userRegisteraion}
+
+export {userRegisteraion, userLogin};
