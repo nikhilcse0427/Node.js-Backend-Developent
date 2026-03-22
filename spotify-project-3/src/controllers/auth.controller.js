@@ -2,7 +2,6 @@ import userModel from "../models/user.model.js";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 
-
 const userRegisteraion = async (req, res)=>{
   try{
     let {userName, email, password, role="user"} = req.body;
