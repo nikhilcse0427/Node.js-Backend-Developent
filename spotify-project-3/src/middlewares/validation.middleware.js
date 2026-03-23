@@ -29,4 +29,4 @@ const validateResult = async (req, res, next)=>{
   next();
 }
 
-export {validateRules, validationResult};
+export {validateRules, validateResult};

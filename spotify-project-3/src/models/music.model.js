@@ -1,5 +1,4 @@
-import { timeStamp } from "console";
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 const musicSchema = new mongoose.Schema({
   artist:{
@@ -15,7 +14,8 @@ const musicSchema = new mongoose.Schema({
     required: true
   }
 
-}, {timeStamp: true})
+}, { timestamps: true });
 
-const musicModel = Mongoose.model("Music", musicSchema);
-export {musicModel};
+const musicModel = mongoose.model("Music", musicSchema);
+
+export { musicModel };

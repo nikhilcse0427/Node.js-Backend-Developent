@@ -37,7 +37,7 @@ const userRegisteraion = async (req, res)=>{
       {expiresIn: '15h'}
     )
 
-    res.cookie("user", token);
+    res.cookie("token", token);
 
     res.status(201).json({
       message: "user registered successfully",
@@ -87,7 +87,7 @@ const userLogin = async (req, res)=>{
       {expiresIn: '15h'}
     )
 
-    res.cookie("user", token);
+    res.cookie("token", token);
 
     user.password = undefined
 
