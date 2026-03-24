@@ -88,7 +88,7 @@ const playList = async (req, res) => {
       });
     }
 
-    const songs = await musicModel.find();
+    const songs = await musicModel.find().populate("artist", "userName email");
 
     res.status(200).json({
       message: "playlist fetched successfully",
@@ -105,4 +105,47 @@ const playList = async (req, res) => {
   }
 };
 
-export { createMusic, playList };
+const album = async (req, res)=>{
+  try{
+    const token = req.cookies.token;
+    if(!token){
+      return res.status(400).json({
+        message: "token is required",
+        success: false
+      })
+    }
+
+    const decodedToken = jwt.verify(token,process.env.JWT_SECRET);
+
+    const user = await musicModel.findById(decodedToken.id);
+
+    if(!user || user.role !== "artist"){
+      return res.status(409).json({
+        message: "Unauthorized user",
+        success: false
+      })
+    }
+    
+    const {title, musicId} = req.body;
+
+    const musicAlbum = await musicModel.create({
+      title,
+      songs: musicId,
+      artist: decodedToken.id
+    })
+
+    res.status(200).json({
+      message: "album created successfully",
+      success: true,
+      album: musicAlbum
+    })
+  }catch(error){
+    console.log("album creation failed ", error.message);
+    res.status(500).json({
+      message: "album creation failed",
+      success: false
+    })
+  }
+}
+
+export { createMusic, playList, album };
